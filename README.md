@@ -139,6 +139,8 @@ The SDK provides the following methods:
 - **Cancel**: Cancel scheduled messages
 - **Receive**: Receive incoming messages
 - **CountInbox**: Count inbox messages
+- **CountPostalcode**: Count subscribers by postal code
+- **SendbyPostalcode**: Send SMS to recipients filtered by postal code
 - **AccountInfo**: Get account information
 - **AccountConfig**: Configure account settings
 - **VerifyLookup**: Send verification codes using templates
@@ -146,11 +148,11 @@ The SDK provides the following methods:
 
 ## Error Handling
 
-The SDK provides two main exception types:
+The SDK provides three main exception types:
 
 - **ApiException**: Thrown when the API returns a non-200 status code
 - **HttpException**: Thrown when there are connection or HTTP-level errors
-- **NotProperlyConfiguredException**: Thrown when the SDK is not properly configured
+- **NotProperlyConfiguredException**: Thrown when the SDK is not properly configured (e.g., missing API key or cURL extension not loaded)
 
 Always wrap your API calls in try-catch blocks to handle exceptions gracefully.
 
