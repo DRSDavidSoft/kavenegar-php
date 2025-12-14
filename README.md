@@ -1,145 +1,181 @@
+# Kavenegar PHP SDK
 
-# Kavenegar-PHP
 [![Latest Stable Version](https://poser.pugx.org/kavenegar/php/v/stable.svg)](https://packagist.org/packages/kavenegar/php)
 [![Total Downloads](https://poser.pugx.org/kavenegar/php/downloads.svg)](https://packagist.org/packages/kavenegar/php)
 
-# <a href="http://kavenegar.com/rest.html">Kavenegar RESTful API Document</a>
-If you need to future information about API document Please visit RESTful Document
+> **Language**: English | [فارسی](README.fa.md)
+
+A professional PHP wrapper for the Kavenegar API, enabling seamless integration of SMS and voice call services into your PHP applications.
+
+## About Kavenegar
+
+Kavenegar is a comprehensive web service platform for sending and receiving SMS messages and managing voice calls. This SDK provides a simple and efficient way to interact with the Kavenegar RESTful API.
+
+For complete API documentation, please visit the [Kavenegar REST API Documentation](http://kavenegar.com/rest.html).
+
+## Requirements
+
+- PHP 8.1 or higher
+- cURL extension enabled
 
 ## Installation
-<p>
-First of all, You need to make an account on Kavenegar from <a href="https://panel.kavenegar.com/Client/Membership/Register">Here</a>
-</p>
-<p>
-After that you just need to pick API-KEY up from <a href="http://panel.kavenegar.com/Client/setting/index">My Account</a> section.
-</p>
-<hr>
 
-Use in these ways:
+Install the package via Composer:
 
-```php
+```bash
 composer require kavenegar/php
 ```
 
-or add
+Alternatively, add the following to your `composer.json` file:
 
-```php
-"kavenegar/php": "*"
-```
-And run following command to download extension using **composer**
-
-
-```php
-$ composer update
-```
-
-
-Usage
------
-
-Here is an example to Send SMS by PHP.
-
-```php
-require __DIR__ . '/vendor/autoload.php';
-
-try{
-	$api = new \Kavenegar\KavenegarApi( "API Key" );
-	$sender = "10004346";
-	$message = "خدمات پیام کوتاه کاوه نگار";
-	$receptor = array("09123456789","09367891011");
-	$result = $api->Send($sender,$receptor,$message);
-	if($result){
-		foreach($result as $r){
-			echo "messageid = $r->messageid";
-			echo "message = $r->message";
-			echo "status = $r->status";
-			echo "statustext = $r->statustext";
-			echo "sender = $r->sender";
-			echo "receptor = $r->receptor";
-			echo "date = $r->date";
-			echo "cost = $r->cost";
-		}
-	}
-}
-catch(\Kavenegar\Exceptions\ApiException $e){
-	// در صورتی که خروجی وب سرویس 200 نباشد این خطا رخ می دهد
-	echo $e->errorMessage();
-}
-catch(\Kavenegar\Exceptions\HttpException $e){
-	// در زمانی که مشکلی در برقرای ارتباط با وب سرویس وجود داشته باشد این خطا رخ می دهد
-	echo $e->errorMessage();
-}
-```
-
-Example output:
 ```json
 {
-	"return": {
-		"status": 200,
-		"message": "تایید شد"
-	},
-	"entries": [
-		{
-			"messageid": 8792343,
-			"message": "خدمات پیام کوتاه کاوه نگار",
-			"status": 1,
-			"statustext": "در صف ارسال",
-			"sender": "10004346",
-			"receptor": "09123456789",
-			"date": 1356619709,
-			"cost": 120
-		},
-		{
-			"messageid": 8792344,
-			"message": "خدمات پیام کوتاه کاوه نگار",
-			"status": 1,
-			"statustext": "در صف ارسال",
-			"sender": "10004346",
-			"receptor": "09367891011",
-			"date": 1356619709,
-			"cost": 120
-		}
-	]
+    "require": {
+        "kavenegar/php": "*"
+    }
 }
 ```
 
-## Contribution
+Then run:
 
-Bug fixes, documentation, and enhancements are welcome! Please let us know here: <a href="mailto:support@kavenegar.com?Subject=SDK" target="_top">support@kavenegar.com</a>
+```bash
+composer update
+```
 
-<hr>
+## Getting Started
 
-<div dir='rtl'>
+### 1. Create an Account
 
-## راهنما
+If you don't have a Kavenegar account yet, you can register for free at [Kavenegar Registration](https://panel.kavenegar.com/Client/Membership/Register).
 
-### معرفی سرویس کاوه نگار
+### 2. Obtain Your API Key
 
-کاوه نگار یک وب سرویس ارسال و دریافت پیامک و تماس صوتی است که به راحتی میتوانید از آن استفاده نمایید.
+After registration, retrieve your API key from the [Account Settings](http://panel.kavenegar.com/Client/setting/index) section of your Kavenegar panel.
 
-### ساخت حساب کاربری
+## Usage
 
-اگر در وب سرویس کاوه نگار عضو نیستید میتوانید از [لینک عضویت](http://panel.kavenegar.com/client/membership/register) ثبت نام و اکانت آزمایشی برای تست API دریافت نمایید.
+### Basic Example: Sending SMS
 
-### مستندات
+```php
+<?php
 
-برای مشاهده اطلاعات کامل مستندات [وب سرویس پیامک](http://kavenegar.com/وب-سرویس-پیامک.html) به صفحه [مستندات وب سرویس](http://kavenegar.com/rest.html) مراجعه نمایید.
+require __DIR__ . '/vendor/autoload.php';
 
-### راهنمای فارسی
+try {
+    $api = new \Kavenegar\KavenegarApi("YOUR_API_KEY");
+    
+    $sender = "10004346";
+    $message = "Your message content";
+    $receptor = ["09123456789", "09367891011"];
+    
+    $result = $api->Send($sender, $receptor, $message);
+    
+    if ($result) {
+        foreach ($result as $r) {
+            echo "Message ID: " . $r->messageid . "\n";
+            echo "Message: " . $r->message . "\n";
+            echo "Status: " . $r->status . "\n";
+            echo "Status Text: " . $r->statustext . "\n";
+            echo "Sender: " . $r->sender . "\n";
+            echo "Receptor: " . $r->receptor . "\n";
+            echo "Date: " . $r->date . "\n";
+            echo "Cost: " . $r->cost . "\n";
+        }
+    }
+} catch (\Kavenegar\Exceptions\ApiException $e) {
+    // Handle API exceptions (non-200 responses)
+    echo "API Error: " . $e->errorMessage();
+} catch (\Kavenegar\Exceptions\HttpException $e) {
+    // Handle HTTP connection errors
+    echo "HTTP Error: " . $e->errorMessage();
+}
+```
 
-در صورتی که مایل هستید راهنمای فارسی کیت توسعه کاوه نگار را مطالعه کنید به صفحه [کد ارسال پیامک](http://kavenegar.com/sdk.html) مراجعه نمایید.
+### Example Response
 
-### اطالاعات بیشتر
-برای مطالعه بیشتر به صفحه معرفی
-[وب سرویس اس ام اس ](http://kavenegar.com)
-کاوه نگار
-مراجعه نمایید .
+```json
+{
+    "return": {
+        "status": 200,
+        "message": "Approved"
+    },
+    "entries": [
+        {
+            "messageid": 8792343,
+            "message": "Your message content",
+            "status": 1,
+            "statustext": "Queued for sending",
+            "sender": "10004346",
+            "receptor": "09123456789",
+            "date": 1356619709,
+            "cost": 120
+        },
+        {
+            "messageid": 8792344,
+            "message": "Your message content",
+            "status": 1,
+            "statustext": "Queued for sending",
+            "sender": "10004346",
+            "receptor": "09367891011",
+            "date": 1356619709,
+            "cost": 120
+        }
+    ]
+}
+```
 
- اگر در استفاده از کیت های سرویس کاوه نگار مشکلی یا پیشنهادی داشتید ما را با یک Pull Request یا ارسال ایمیل به support@kavenegar.com خوشحال کنید.
+## Available Methods
 
-##
-![http://kavenegar.com](http://kavenegar.com/public/images/logo.png)
+The SDK provides the following methods:
 
-[http://kavenegar.com](http://kavenegar.com)
+- **Send**: Send SMS to one or more recipients
+- **SendArray**: Send multiple SMS messages with different parameters
+- **Status**: Check the delivery status of sent messages
+- **StatusLocalMessageId**: Check status using local message ID
+- **Select**: Retrieve message details
+- **SelectOutbox**: Get messages from outbox within a date range
+- **LatestOutbox**: Retrieve the latest outbox messages
+- **CountOutbox**: Count outbox messages
+- **Cancel**: Cancel scheduled messages
+- **Receive**: Receive incoming messages
+- **CountInbox**: Count inbox messages
+- **CountPostalcode**: Count subscribers by postal code
+- **SendbyPostalcode**: Send SMS to recipients filtered by postal code
+- **AccountInfo**: Get account information
+- **AccountConfig**: Configure account settings
+- **VerifyLookup**: Send verification codes using templates
+- **CallMakeTTS**: Make text-to-speech voice calls
 
-</div>
+## Error Handling
+
+The SDK provides three main exception types:
+
+- **ApiException**: Thrown when the API returns a non-200 status code
+- **HttpException**: Thrown when there are connection or HTTP-level errors
+- **NotProperlyConfiguredException**: Thrown when the SDK is not properly configured (e.g., missing API key or cURL extension not loaded)
+
+Always wrap your API calls in try-catch blocks to handle exceptions gracefully.
+
+## Contributing
+
+We welcome contributions! If you encounter any bugs, have suggestions for improvements, or would like to add new features, please:
+
+- Open an issue on GitHub
+- Submit a pull request
+- Contact us at [support@kavenegar.com](mailto:support@kavenegar.com)
+
+## License
+
+This project is licensed under the MIT License.
+
+## Links
+
+- [Kavenegar Website](http://kavenegar.com)
+- [API Documentation](http://kavenegar.com/rest.html)
+- [Support](mailto:support@kavenegar.com)
+
+---
+
+![Kavenegar](http://kavenegar.com/public/images/logo.png)
+
+**Kavenegar** - Professional SMS and Voice Services
