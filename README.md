@@ -4,7 +4,7 @@
 [![Total Downloads](https://poser.pugx.org/kavenegar/php/downloads.svg)](https://packagist.org/packages/kavenegar/php)
 
 # <a href="http://kavenegar.com/rest.html">Kavenegar RESTful API Document</a>
-If you need to future information about API document Please visit RESTful Document
+If you need further information about API document, please visit RESTful Document
 
 ## Installation
 <p>
