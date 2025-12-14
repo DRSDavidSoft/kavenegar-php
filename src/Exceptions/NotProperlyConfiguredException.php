@@ -9,5 +9,3 @@ class NotProperlyConfiguredException extends BaseRuntimeException
         return 'NotProperlyConfigured';
     }
 }
-
-?>
