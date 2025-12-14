@@ -20,7 +20,7 @@ class KavenegarApi
         if (!extension_loaded('curl')) {
             throw new NotProperlyConfiguredException('cURL library is not loaded');
         }
-        if (is_null($apiKey)) {
+        if (empty(trim($apiKey))) {
             throw new NotProperlyConfiguredException('apiKey is empty');
         }
         $this->apiKey = trim($apiKey);
