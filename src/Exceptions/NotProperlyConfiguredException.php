@@ -4,7 +4,7 @@ namespace Kavenegar\Exceptions;
 
 class NotProperlyConfiguredException extends BaseRuntimeException
 {
-    public function getName()
+    public function getName(): string
     {
         return 'NotProperlyConfigured';
     }
