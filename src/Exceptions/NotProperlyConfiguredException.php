@@ -7,7 +7,7 @@ class NotProperlyConfiguredException extends BaseRuntimeException
     public function getName()
     {
         return 'NotProperlyConfigured';
-    }	
+    }
 }
 
 ?>
