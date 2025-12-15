@@ -62,5 +62,4 @@ jobs:
     
     - name: Check PHP syntax
       run: |
-        find src -name "*.php" -exec php -l {} \; | grep -v "No syntax errors"
-        if [ $? -eq 0 ]; then exit 1; else exit 0; fi
+        find src -name "*.php" -print0 | xargs -0 -n1 php -l

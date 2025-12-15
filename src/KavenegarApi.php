@@ -270,17 +270,10 @@ class KavenegarApi
             "template" => $template,
             "type" => $type
         ];
-        if(func_num_args()>5){
-            $arg_list = func_get_args();
-            if(isset($arg_list[6]))
-                $params["token10"]=$arg_list[6];
-            if(isset($arg_list[7]))
-                $params["token20"]=$arg_list[7];
-        }
         return $this->execute($path, $params);
     }
 
-    public function CallMakeTTS(string $receptor, string $message, ?int $date = null, ?array $localid = null): mixed
+    public function CallMakeTTS(string $receptor, string $message, ?int $date = null, string|array|null $localid = null): mixed
     {
         $path   = $this->get_path("maketts", "call");
         $params = [
