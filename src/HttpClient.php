@@ -24,15 +24,29 @@ class HttpClient
     private function loadProxySettings(): void
     {
         // Check for proxy environment variables
-        $httpProxy = getenv('HTTP_PROXY') ?: getenv('http_proxy');
-        $httpsProxy = getenv('HTTPS_PROXY') ?: getenv('https_proxy');
-        $noProxy = getenv('NO_PROXY') ?: getenv('no_proxy');
+        // getenv() returns false if the variable doesn't exist, so we need to handle that
+        $httpProxy = getenv('HTTP_PROXY');
+        if ($httpProxy === false) {
+            $httpProxy = getenv('http_proxy');
+        }
+        
+        $httpsProxy = getenv('HTTPS_PROXY');
+        if ($httpsProxy === false) {
+            $httpsProxy = getenv('https_proxy');
+        }
+        
+        $noProxy = getenv('NO_PROXY');
+        if ($noProxy === false) {
+            $noProxy = getenv('no_proxy');
+        }
         
         // Use HTTPS proxy if available, otherwise fall back to HTTP proxy
-        $this->proxy = $httpsProxy ?: $httpProxy ?: null;
+        // Ensure we only assign string values, not false
+        $this->proxy = ($httpsProxy !== false && $httpsProxy !== '') ? $httpsProxy 
+                     : (($httpProxy !== false && $httpProxy !== '') ? $httpProxy : null);
         
         // Parse NO_PROXY environment variable
-        if ($noProxy) {
+        if ($noProxy !== false && $noProxy !== '') {
             $this->noProxy = array_map('trim', explode(',', $noProxy));
         }
     }
@@ -164,17 +178,7 @@ class HttpClient
             $code = $response->getStatusCode();
             $body = (string) $response->getBody();
             
-            $json_response = json_decode($body);
-            
-            if ($code != 200 && is_null($json_response)) {
-                throw new HttpException("Request have errors", $code);
-            }
-            
-            if (isset($json_response->return) && $json_response->return->status != 200) {
-                throw new HttpException($json_response->return->message, $json_response->return->status);
-            }
-            
-            return $json_response;
+            return $this->handleApiResponse($body, $code);
         } catch (\Exception $e) {
             if ($e instanceof HttpException) {
                 throw $e;
@@ -223,17 +227,7 @@ class HttpClient
             throw new HttpException($curl_error, $curl_errno);
         }
         
-        $json_response = json_decode($response);
-        
-        if ($code != 200 && is_null($json_response)) {
-            throw new HttpException("Request have errors", $code);
-        }
-        
-        if (isset($json_response->return) && $json_response->return->status != 200) {
-            throw new HttpException($json_response->return->message, $json_response->return->status);
-        }
-        
-        return $json_response;
+        return $this->handleApiResponse($response, $code);
     }
     
     /**
@@ -265,6 +259,9 @@ class HttpClient
         }
         
         $context = stream_context_create($options);
+        
+        // Clear previous errors to ensure we get the right error
+        error_clear_last();
         $response = @file_get_contents($url, false, $context);
         
         if ($response === false) {
@@ -273,17 +270,34 @@ class HttpClient
         }
         
         // Get HTTP response code from headers
+        // $http_response_header is a special variable created by file_get_contents
         $code = 200;
-        if (isset($http_response_header)) {
-            foreach ($http_response_header as $header) {
-                if (preg_match('/^HTTP\/\d\.\d\s+(\d+)/', $header, $matches)) {
-                    $code = (int) $matches[1];
-                    break;
-                }
+        $http_response_header = $http_response_header ?? [];
+        foreach ($http_response_header as $header) {
+            if (preg_match('/^HTTP\/\d\.\d\s+(\d+)/', $header, $matches)) {
+                $code = (int) $matches[1];
+                break;
             }
         }
         
-        $json_response = json_decode($response);
+        return $this->handleApiResponse($response, $code);
+    }
+    
+    /**
+     * Handle API response parsing and error checking
+     * 
+     * @param string $response The raw response body
+     * @param int $code The HTTP status code
+     * @return mixed The decoded JSON response
+     * @throws HttpException
+     */
+    private function handleApiResponse(string $response, int $code): mixed
+    {
+        try {
+            $json_response = json_decode($response, false, 512, JSON_THROW_ON_ERROR);
+        } catch (\JsonException $e) {
+            throw new HttpException("Invalid JSON response: " . $e->getMessage(), $code);
+        }
         
         if ($code != 200 && is_null($json_response)) {
             throw new HttpException("Request have errors", $code);
