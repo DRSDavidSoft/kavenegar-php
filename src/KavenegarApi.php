@@ -15,16 +15,16 @@ class KavenegarApi
     const VERSION = "2.0.0-dev";
     private string $apiKey = "";
     private bool $insecure = false;
-    public function __construct(string $apiKey, bool $insecure = false)
+    private HttpClient $httpClient;
+    
+    public function __construct(string $apiKey, bool $insecure = false, ?HttpClient $httpClient = null)
     {
-        if (!extension_loaded('curl')) {
-            throw new NotProperlyConfiguredException('cURL library is not loaded');
-        }
         if (empty(trim($apiKey))) {
             throw new NotProperlyConfiguredException('apiKey is empty');
         }
         $this->apiKey = trim($apiKey);
         $this->insecure = $insecure;
+        $this->httpClient = $httpClient ?? new HttpClient();
     }
 
 	protected function get_path(string $method, string $base = 'sms'): string
@@ -34,42 +34,24 @@ class KavenegarApi
 
 	protected function execute(string $url, ?array $data = null): mixed
     {
-        $headers = [
-            'Accept: application/json',
-            'Content-Type: application/x-www-form-urlencoded; charset=utf-8'
-        ];
-        $fields_string = "";
-        if (!is_null($data)) {
-            $fields_string = http_build_query($data);
-        }
-        $handle = curl_init();
-        curl_setopt($handle, CURLOPT_URL, $url);
-        curl_setopt($handle, CURLOPT_HTTPHEADER, $headers);
-        curl_setopt($handle, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($handle, CURLOPT_SSL_VERIFYHOST, false);
-        curl_setopt($handle, CURLOPT_SSL_VERIFYPEER, false);
-        curl_setopt($handle, CURLOPT_POST, true);
-        curl_setopt($handle, CURLOPT_POSTFIELDS, $fields_string);
-
-        $response     = curl_exec($handle);
-        $code         = curl_getinfo($handle, CURLINFO_HTTP_CODE);
-        $content_type = curl_getinfo($handle, CURLINFO_CONTENT_TYPE);
-        $curl_errno   = curl_errno($handle);
-        $curl_error   = curl_error($handle);
-        if ($curl_errno) {
-            throw new HttpException($curl_error, $curl_errno);
-        }
-        $json_response = json_decode($response);
-        if ($code != 200 && is_null($json_response)) {
-            throw new HttpException("Request have errors", $code);
-        } else {
-            $json_return = $json_response->return;
-            if ($json_return->status != 200) {
-                throw new ApiException($json_return->message, $json_return->status);
+        try {
+            $json_response = $this->httpClient->post($url, $data);
+            
+            if (isset($json_response->return)) {
+                $json_return = $json_response->return;
+                if ($json_return->status != 200) {
+                    throw new ApiException($json_return->message, $json_return->status);
+                }
             }
+            
             return $json_response;
+        } catch (HttpException $e) {
+            // Re-throw HttpException as-is
+            throw $e;
+        } catch (\Exception $e) {
+            // Wrap other exceptions in HttpException
+            throw new HttpException($e->getMessage(), $e->getCode());
         }
-
     }
 
     public function Send(string $sender, string|array $receptor, string $message, ?int $date = null, ?int $type = null, string|array|null $localid = null): mixed
