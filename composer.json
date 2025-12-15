@@ -29,7 +29,7 @@
     },
     "scripts": {
         "test": "phpunit",
-        "lint": "find src -name '*.php' -exec php -l {} \\;"
+        "lint": "find src -name '*.php' -print0 | xargs -0 -n1 php -l"
     },
     "minimum-stability" : "stable"
 }
