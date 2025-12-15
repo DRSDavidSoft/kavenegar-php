@@ -275,6 +275,9 @@ class KavenegarApi
 
     public function CallMakeTTS(string $receptor, string $message, ?int $date = null, string|array|null $localid = null): mixed
     {
+        if (is_array($localid)) {
+            $localid = implode(",", $localid);
+        }
         $path   = $this->get_path("maketts", "call");
         $params = [
             "receptor" => $receptor,
