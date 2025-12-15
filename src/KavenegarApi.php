@@ -13,9 +13,9 @@ class KavenegarApi
 {
     const APIPATH = "%s://api.kavenegar.com/v1/%s/%s/%s.json/";
     const VERSION = "2.0.0-dev";
-    private $apiKey = "";
-    private $insecure = false;
-    public function __construct($apiKey, $insecure=false)
+    private string $apiKey = "";
+    private bool $insecure = false;
+    public function __construct(string $apiKey, bool $insecure = false)
     {
         if (!extension_loaded('curl')) {
             throw new NotProperlyConfiguredException('cURL library is not loaded');
@@ -27,18 +27,17 @@ class KavenegarApi
         $this->insecure = $insecure;
     }
 
-	protected function get_path($method, $base = 'sms')
+	protected function get_path(string $method, string $base = 'sms'): string
     {
         return sprintf(self::APIPATH,$this->insecure==true ? "http": "https", $this->apiKey, $base, $method);
     }
 
-	protected function execute($url, $data = null)
+	protected function execute(string $url, ?array $data = null): mixed
     {
-        $headers       = array(
+        $headers = [
             'Accept: application/json',
-            'Content-Type: application/x-www-form-urlencoded',
-            'charset: utf-8'
-        );
+            'Content-Type: application/x-www-form-urlencoded; charset=utf-8'
+        ];
         $fields_string = "";
         if (!is_null($data)) {
             $fields_string = http_build_query($data);
@@ -73,7 +72,7 @@ class KavenegarApi
 
     }
 
-    public function Send($sender, $receptor, $message, $date = null, $type = null, $localid = null)
+    public function Send(string $sender, string|array $receptor, string $message, ?int $date = null, ?int $type = null, string|array|null $localid = null): mixed
     {
         if (is_array($receptor)) {
             $receptor = implode(",", $receptor);
@@ -82,18 +81,18 @@ class KavenegarApi
             $localid = implode(",", $localid);
         }
         $path   = $this->get_path("send");
-        $params = array(
+        $params = [
             "receptor" => $receptor,
             "sender" => $sender,
             "message" => $message,
             "date" => $date,
             "type" => $type,
             "localid" => $localid
-        );
+        ];
         return $this->execute($path, $params);
     }
 
-    public function SendArray($sender, $receptor, $message, $date = null, $type = null, $localmessageid = null)
+    public function SendArray(string|array $sender, string|array $receptor, string|array $message, ?int $date = null, int|array|null $type = null, int|array|null $localmessageid = null): mixed
     {
         if (!is_array($receptor)) {
             $receptor = (array) $receptor;
@@ -112,120 +111,120 @@ class KavenegarApi
             $localmessageid = array_fill(0, $repeat, $localmessageid);
         }
         $path   = $this->get_path("sendarray");
-        $params = array(
+        $params = [
             "receptor" => json_encode($receptor),
             "sender" => json_encode($sender),
             "message" => json_encode($message),
             "date" => $date,
             "type" => json_encode($type),
             "localmessageid" => json_encode($localmessageid)
-        );
+        ];
         return $this->execute($path, $params);
     }
 
-    public function Status($messageid)
+    public function Status(string|array $messageid): mixed
     {
         $path = $this->get_path("status");
-		$params = array(
+		$params = [
             "messageid" => is_array($messageid) ? implode(",", $messageid) : $messageid
-        );
+        ];
         return $this->execute($path,$params);
     }
 
-    public function StatusLocalMessageId($localid)
+    public function StatusLocalMessageId(string|array $localid): mixed
     {
         $path = $this->get_path("statuslocalmessageid");
-		$params = array(
+		$params = [
             "localid" => is_array($localid) ? implode(",", $localid) : $localid
-        );
+        ];
         return $this->execute($path, $params);
     }
 
-    public function Select($messageid)
+    public function Select(string|array $messageid): mixed
     {
-		$params = array(
+		$params = [
             "messageid" => is_array($messageid) ? implode(",", $messageid) : $messageid
-        );
+        ];
         $path = $this->get_path("select");
         return $this->execute($path, $params);
     }
 
-    public function SelectOutbox($startdate, $enddate, $sender)
+    public function SelectOutbox(int $startdate, int $enddate, string $sender): mixed
     {
         $path   = $this->get_path("selectoutbox");
-        $params = array(
+        $params = [
             "startdate" => $startdate,
             "enddate" => $enddate,
             "sender" => $sender
-        );
+        ];
         return $this->execute($path, $params);
     }
 
-    public function LatestOutbox($pagesize, $sender)
+    public function LatestOutbox(int $pagesize, string $sender): mixed
     {
         $path   = $this->get_path("latestoutbox");
-        $params = array(
+        $params = [
             "pagesize" => $pagesize,
             "sender" => $sender
-        );
+        ];
         return $this->execute($path, $params);
     }
 
-    public function CountOutbox($startdate, $enddate, $status = 0)
+    public function CountOutbox(int $startdate, int $enddate, int $status = 0): mixed
     {
         $path   = $this->get_path("countoutbox");
-        $params = array(
+        $params = [
             "startdate" => $startdate,
             "enddate" => $enddate,
             "status" => $status
-        );
+        ];
         return $this->execute($path, $params);
     }
 
-    public function Cancel($messageid)
+    public function Cancel(string|array $messageid): mixed
     {
         $path = $this->get_path("cancel");
-		$params = array(
+		$params = [
             "messageid" => is_array($messageid) ? implode(",", $messageid) : $messageid
-        );
+        ];
         return $this->execute($path,$params);
     }
 
-    public function Receive($linenumber, $isread = 0)
+    public function Receive(string $linenumber, int $isread = 0): mixed
     {
         $path   = $this->get_path("receive");
-        $params = array(
+        $params = [
             "linenumber" => $linenumber,
             "isread" => $isread
-        );
+        ];
         return $this->execute($path, $params);
     }
 
-    public function CountInbox($startdate, $enddate, $linenumber, $isread = 0)
+    public function CountInbox(int $startdate, int $enddate, string $linenumber, int $isread = 0): mixed
     {
         $path   = $this->get_path("countinbox");
-        $params = array(
+        $params = [
             "startdate" => $startdate,
             "enddate" => $enddate,
             "linenumber" => $linenumber,
             "isread" => $isread
-        );
+        ];
         return $this->execute($path, $params);
     }
 
-    public function CountPostalcode($postalcode)
+    public function CountPostalcode(string $postalcode): mixed
     {
         $path   = $this->get_path("countpostalcode");
-        $params = array(
+        $params = [
             "postalcode" => $postalcode
-        );
+        ];
         return $this->execute($path, $params);
     }
 
-    public function SendbyPostalcode($sender,$postalcode,$message, $mcistartindex, $mcicount, $mtnstartindex, $mtncount, $date)
+    public function SendbyPostalcode(string $sender, string $postalcode, string $message, int $mcistartindex, int $mcicount, int $mtnstartindex, int $mtncount, ?int $date): mixed
     {
         $path   = $this->get_path("sendbypostalcode");
-        $params = array(
+        $params = [
             "postalcode" => $postalcode,
             "sender" => $sender,
             "message" => $message,
@@ -234,34 +233,34 @@ class KavenegarApi
             "mtnstartindex" => $mtnstartindex,
             "mtncount" => $mtncount,
             "date" => $date
-        );
+        ];
         return $this->execute($path, $params);
     }
 
-    public function AccountInfo()
+    public function AccountInfo(): mixed
     {
         $path = $this->get_path("info", "account");
         return $this->execute($path);
     }
 
-    public function AccountConfig($apilogs, $dailyreport, $debug, $defaultsender, $mincreditalarm, $resendfailed)
+    public function AccountConfig(string $apilogs, string $dailyreport, string $debug, string $defaultsender, int $mincreditalarm, string $resendfailed): mixed
     {
         $path   = $this->get_path("config", "account");
-        $params = array(
+        $params = [
             "apilogs" => $apilogs,
             "dailyreport" => $dailyreport,
             "debug" => $debug,
             "defaultsender" => $defaultsender,
             "mincreditalarm" => $mincreditalarm,
             "resendfailed" => $resendfailed
-        );
+        ];
         return $this->execute($path, $params);
     }
 
-    public function VerifyLookup($receptor, $token, $token2 = null, $token3 = null, $token10 = null, $token20 = null, $template = 'verify', $type = null)
+    public function VerifyLookup(string $receptor, string $token, ?string $token2 = null, ?string $token3 = null, ?string $token10 = null, ?string $token20 = null, string $template = 'verify', ?int $type = null): mixed
     {
         $path   = $this->get_path("lookup", "verify");
-        $params = array(
+        $params = [
             "receptor" => $receptor,
             "token" => $token,
             "token2" => $token2,
@@ -270,26 +269,19 @@ class KavenegarApi
             "token20" => $token20,
             "template" => $template,
             "type" => $type
-        );
-        if(func_num_args()>5){
-            $arg_list = func_get_args();
-            if(isset($arg_list[6]))
-                $params["token10"]=$arg_list[6];
-            if(isset($arg_list[7]))
-                $params["token20"]=$arg_list[7];
-        }
+        ];
         return $this->execute($path, $params);
     }
 
-    public function CallMakeTTS($receptor, $message, $date = null, $localid = null)
+    public function CallMakeTTS(string $receptor, string $message, ?int $date = null, string|array|null $localid = null): mixed
     {
         $path   = $this->get_path("maketts", "call");
-        $params = array(
+        $params = [
             "receptor" => $receptor,
             "message" => $message,
             "date" => $date,
             "localid" => $localid
-        );
+        ];
         return $this->execute($path, $params);
     }
 }
