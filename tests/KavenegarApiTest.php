@@ -39,4 +39,20 @@ class KavenegarApiTest extends TestCase
         $api = new KavenegarApi("  test-api-key-123456  ");
         $this->assertInstanceOf(KavenegarApi::class, $api);
     }
+
+    public function testNullApiKeyThrowsConfigurationException(): void
+    {
+        $this->expectException(NotProperlyConfiguredException::class);
+        new KavenegarApi(null);
+    }
+
+    public function testTlsVerificationDefaultsOnAndCanBeExplicitlyConfigured(): void
+    {
+        $api = new KavenegarApi('dummy');
+        self::assertTrue($api->getSslVerify());
+        self::assertSame($api, $api->setSslVerify(false));
+        self::assertFalse($api->getSslVerify());
+        self::assertTrue($api->setSslVerify(true)->getSslVerify());
+        self::assertFalse((new KavenegarApi('dummy', false, null, false))->getSslVerify());
+    }
 }
